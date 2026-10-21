@@ -152,4 +152,21 @@ describe("runPrintMode", () => {
 		expect(exitCode).toBe(1);
 		expect(errorSpy).toHaveBeenCalled();
 	});
+
+	// #11210
+	it("warns on stderr when a completed response ends abruptly", async () => {
+		const runtimeHost = createRuntimeHost(
+			createAssistantMessage({
+				text: "4. **Reflection 真实 lint/test 反馈**\n   - 目前 reviewer 仍主要是 LLM 评分\n   - 应把 lint/test 退出码作为一等通过条件",
+			}),
+		);
+		const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+		const exitCode = await runPrintMode(runtimeHost as unknown as Parameters<typeof runPrintMode>[0], {
+			mode: "text",
+		});
+
+		expect(exitCode).toBe(0);
+		expect(errorSpy).toHaveBeenCalledWith("Response may be incomplete: it ended abruptly.");
+	});
 });

@@ -74,6 +74,24 @@ describe("AssistantMessageComponent", () => {
 		expect(rendered).toContain("Response was truncated before completion.");
 	});
 
+	// #11210
+	test("renders an incomplete notice when a stop reply ends abruptly", () => {
+		initTheme("dark");
+
+		const component = new AssistantMessageComponent(
+			createAssistantMessage([
+				{
+					type: "text",
+					text: "4. **Reflection 真实 lint/test 反馈**\n   - 目前 reviewer 仍主要是 LLM 评分\n   - 应把 lint/test 退出码作为一等通过条件",
+				},
+			]),
+		);
+		const rendered = component.render(80).join("\n");
+
+		expect(rendered).toContain("Response may be incomplete: it ended abruptly.");
+		expect(rendered).not.toContain("Response was truncated before completion.");
+	});
+
 	test("coalesces adjacent thinking blocks into one hidden thinking label", () => {
 		initTheme("dark");
 

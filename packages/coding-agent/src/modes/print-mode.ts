@@ -9,6 +9,7 @@
 import type { AssistantMessage, ImageContent } from "@earendil-works/pi-ai";
 import type { AgentSessionRuntime } from "../core/agent-session-runtime.ts";
 import { flushRawStdout, waitForRawStdoutBackpressure, writeRawStdout } from "../core/output-guard.ts";
+import { looksTruncated } from "../utils/looks-truncated.ts";
 import { killTrackedDetachedChildren } from "../utils/shell.ts";
 import { toJsonEvent } from "./json-event.ts";
 
@@ -154,6 +155,8 @@ export async function runPrintMode(runtimeHost: AgentSessionRuntime, options: Pr
 					if (assistantMsg.stopReason === "length") {
 						console.error("Response was truncated: the model reached its output token limit.");
 						exitCode = 1;
+					} else if (looksTruncated(assistantMsg)) {
+						console.error("Response may be incomplete: it ended abruptly.");
 					}
 				}
 			}
